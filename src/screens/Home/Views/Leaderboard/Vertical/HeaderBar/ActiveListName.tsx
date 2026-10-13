@@ -4,6 +4,7 @@ import { TouchableOpacity } from 'react-native'
 import { useTheme } from '@/store/theme/hook'
 import { createStyle } from '@/utils/tools'
 import Text from '@/components/common/Text'
+import { Icon } from '@/components/common/Icon'
 
 export interface ActiveListNameProps {
   onShowBound: () => void
@@ -25,6 +26,7 @@ export default forwardRef<ActiveListNameType, ActiveListNameProps>(({ onShowBoun
   return (
     <TouchableOpacity onPress={onShowBound} style={styles.currentList}>
       <Text numberOfLines={1} style={styles.currentListText} color={theme['c-button-font']}>{currentListName}</Text>
+      <Icon name="chevron-right" style={styles.arrow} color={theme['c-button-font']} size={12} />
     </TouchableOpacity>
   )
 })
@@ -44,6 +46,10 @@ const styles = createStyle({
     paddingRight: 10,
     // paddingTop: 10,
     // paddingBottom: 0,
+  },
+  arrow: {
+    paddingRight: 12,
+    transform: [{ rotate: '90deg' }],
   },
   currentListText: {
     flex: 1,

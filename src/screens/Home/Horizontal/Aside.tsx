@@ -3,6 +3,7 @@ import { ScrollView, TouchableOpacity, View } from 'react-native'
 import { useNavActiveId, useStatusbarHeight } from '@/store/common/hook'
 import { useTheme } from '@/store/theme/hook'
 import { Icon } from '@/components/common/Icon'
+import Text from '@/components/common/Text'
 import { confirmDialog, createStyle, exitApp as backHome } from '@/utils/tools'
 import { NAV_MENUS } from '@/config/constant'
 import type { InitState } from '@/store/common/state'
@@ -69,8 +70,7 @@ const Header = () => {
   return (
     <View style={{ paddingTop: statusBarHeight }}>
       <View style={styles.header}>
-        <Icon name="logo" color={theme['c-primary-dark-100-alpha-300']} size={22} />
-        {/* <Text style={styles.headerText} size={16} color={theme['c-primary-dark-100-alpha-300']}>LX Music</Text> */}
+        <Text size={16} color={theme['c-primary-dark-100-alpha-300']}>LZ</Text>
       </View>
     </View>
   )

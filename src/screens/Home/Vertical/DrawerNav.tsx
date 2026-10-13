@@ -29,7 +29,6 @@ const styles = createStyle({
   },
   headerText: {
     textAlign: 'center',
-    marginLeft: 16,
   },
   menus: {
     flex: 1,
@@ -63,7 +62,6 @@ const Header = () => {
   return (
     <View style={{ paddingTop: statusBarHeight, backgroundColor: theme['c-primary-light-700-alpha-500'] }}>
       <View style={styles.header}>
-        <Icon name="logo" color={theme['c-primary-dark-100-alpha-300']} size={28} />
         <Text style={styles.headerText} size={28} color={theme['c-primary-dark-100-alpha-300']}>LZ Music</Text>
       </View>
     </View>
