@@ -82,7 +82,7 @@ const downloadOne = async(musicInfo: LX.Music.MusicInfoOnline) => {
 let queue: Promise<void> = Promise.resolve()
 
 export const downloadMusics = async(list: LX.Music.MusicInfo[]) => {
-  const musics = list.filter(m => m.source != 'local') as LX.Music.MusicInfoOnline[]
+  const musics = list.filter((m): m is LX.Music.MusicInfoOnline => m.source != 'local')
   if (!musics.length) {
     toast(global.i18n.t('download_local_tip'))
     return
