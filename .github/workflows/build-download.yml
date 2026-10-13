@@ -75,12 +75,18 @@ jobs:
       - name: Remove old releases
         env:
           GH_TOKEN: ${{ github.token }}
+          REPO: ${{ github.repository }}
+          CURRENT: v${{ env.PACKAGE_VERSION }}-download.${{ github.run_number }}
         shell: bash
         run: |
-          CURRENT="v${{ env.PACKAGE_VERSION }}-download.${{ github.run_number }}"
-          gh release list --repo "${{ github.repository }}" --limit 200 --json tagName --jq '.[].tagName' | while read -r tag; do
-            if [ "$tag" != "$CURRENT" ]; then
-              echo "delete $tag"
-              gh release delete "$tag" --repo "${{ github.repository }}" --cleanup-tag --yes
-            fi
-          done
+          set -o pipefail
+          gh api "repos/$REPO/releases?per_page=100" --jq '.[] | "\(.id) \(.tag_name)"' > releases.txt 2> err.txt || { echo "::error title=list releases::$(cat err.txt)"; exit 1; }
+          cat releases.txt
+          fail=0
+          while read -r id tag; do
+            [ "$tag" = "$CURRENT" ] && continue
+            echo "delete $tag"
+            gh api -X DELETE "repos/$REPO/releases/$id" 2> err.txt || { echo "::error title=delete release $tag::$(cat err.txt)"; fail=1; }
+            gh api -X DELETE "repos/$REPO/git/refs/tags/$tag" 2> err.txt || echo "::warning title=delete tag $tag::$(cat err.txt)"
+          done < releases.txt
+          exit $fail

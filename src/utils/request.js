@@ -18,9 +18,22 @@ const defaultHeaders = {
  * @param {*} options
  */
 export const httpFetch = (url, options = { method: 'get' }) => {
-  const requestObj = fetchData(url, options)
+  let requestObj
+  let isCanceled = false
+  // 网络抖动时自动重试：连接失败最多再试 2 次，超时最多再试 1 次（主动取消的请求不重试）
+  const run = (retryNum) => {
+    requestObj = fetchData(url, options)
+    return requestObj.request.catch(err => {
+      if (isCanceled) return Promise.reject(err)
+      const maxRetry = err.message == 'Aborted' ? 1 : 2
+      if (retryNum >= maxRetry) return Promise.reject(err)
+      console.log('请求失败，重试', retryNum + 1, url)
+      return new Promise(resolve => BackgroundTimer.setTimeout(resolve, 500 * (retryNum + 1)))
+        .then(() => isCanceled ? Promise.reject(err) : run(retryNum + 1))
+    })
+  }
   return {
-    promise: requestObj.request.catch(err => {
+    promise: run(0).catch(err => {
       console.log('出错', err.message)
       switch (err.message) {
         case 'socket hang up':
@@ -34,6 +47,7 @@ export const httpFetch = (url, options = { method: 'get' }) => {
       }
     }),
     cancelHttp() {
+      isCanceled = true
       requestObj.abort()
     },
   }
