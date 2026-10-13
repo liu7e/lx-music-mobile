@@ -3,7 +3,7 @@ import { filterFileName } from '@/utils/common'
 import { formatMusicName } from '@/utils/tools'
 import settingState from '@/store/setting/state'
 
-export const DOWNLOAD_DIR = `${externalStorageDirectoryPath}/Music/LxMusic`
+export const DOWNLOAD_DIR = `${externalStorageDirectoryPath}/Music/LzMusic`
 
 export const getDownloadFileName = (musicInfo: LX.Music.MusicInfoOnline) => {
   return filterFileName(formatMusicName(settingState.setting['download.fileName'], musicInfo.name, musicInfo.singer))
