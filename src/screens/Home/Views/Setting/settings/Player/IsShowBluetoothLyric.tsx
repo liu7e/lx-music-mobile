@@ -1,6 +1,6 @@
 import { updateSetting } from '@/core/common'
 import { useI18n } from '@/lang'
-import { createStyle, remoteLyricTip } from '@/utils/tools'
+import { createStyle } from '@/utils/tools'
 import { memo } from 'react'
 import { View } from 'react-native'
 import { useSettingValue } from '@/store/setting/hook'
@@ -16,9 +16,6 @@ export default memo(() => {
   const t = useI18n()
   const isShowBluetoothLyric = useSettingValue('player.isShowBluetoothLyric')
   const setShowBluetoothLyric = async(isShowBluetoothLyric: boolean) => {
-    if (isShowBluetoothLyric) {
-      await remoteLyricTip()
-    }
     updateSetting({ 'player.isShowBluetoothLyric': isShowBluetoothLyric })
     void showRemoteLyric(isShowBluetoothLyric)
     if (!isShowBluetoothLyric) {

@@ -1,4 +1,4 @@
-import { downloadFile, existsFile, externalStorageDirectoryPath, mkdir, moveFile, temporaryDirectoryPath, unlink } from '@/utils/fs'
+import { downloadFile, existsFile, externalStorageDirectoryPath, mkdir, moveFile, scanFile, temporaryDirectoryPath, unlink } from '@/utils/fs'
 import { filterFileName } from '@/utils/common'
 import { formatMusicName, requestStoragePermission, toast } from '@/utils/tools'
 import { writeLyric, writeMetadata, writePic } from '@/utils/localMediaMetadata'
@@ -76,6 +76,7 @@ const downloadOne = async(musicInfo: LX.Music.MusicInfoOnline) => {
   }
   await writeTags(musicInfo, tempPath)
   await moveFile(tempPath, filePath)
+  void scanFile(filePath).catch(() => {})
   return 'done'
 }
 

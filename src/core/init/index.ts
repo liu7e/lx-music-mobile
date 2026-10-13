@@ -1,4 +1,4 @@
-import { initSetting, showPactModal } from '@/core/common'
+import { initSetting, updateSetting } from '@/core/common'
 import registerPlaybackService from '@/plugins/player/service'
 import initTheme from './theme'
 import initI18n from './i18n'
@@ -11,23 +11,15 @@ import { initDeeplink } from './deeplink'
 import { setApiSource } from '@/core/apiSource'
 import commonActions from '@/store/common/action'
 import settingState from '@/store/setting/state'
-import { checkUpdate } from '@/core/version'
 import { bootLog } from '@/utils/bootLog'
-import { cheatTip } from '@/utils/tools'
 
 let isFirstPush = true
+// 不弹防骗提示、用户协议和自动检查更新（官方更新包签名不同，无法覆盖安装此版本）
 const handlePushedHomeScreen = async() => {
-  await cheatTip()
-  if (settingState.setting['common.isAgreePact']) {
-    if (isFirstPush) {
-      isFirstPush = false
-      void checkUpdate()
-      void initDeeplink()
-    }
-  } else {
-    if (isFirstPush) isFirstPush = false
-    showPactModal()
-  }
+  if (!isFirstPush) return
+  isFirstPush = false
+  if (!settingState.setting['common.isAgreePact']) updateSetting({ 'common.isAgreePact': true })
+  void initDeeplink()
 }
 
 let isInited = false
