@@ -61,7 +61,7 @@ const defaultSetting: LX.AppSetting = {
   'search.isShowHotSearch': false,
   'search.isShowHistorySearch': false,
 
-  'list.isClickPlayList': false,
+  'list.isClickPlayList': true,
   'list.isShowSource': true,
   'list.isShowAlbumName': false,
   'list.isShowInterval': true,
@@ -82,10 +82,5 @@ const defaultSetting: LX.AppSetting = {
 }
 
 
-// 使用新年皮肤
-if (new Date().getMonth() < 2) {
-  defaultSetting['theme.id'] = 'happy_new_year'
-  defaultSetting['desktopLyric.style.lyricPlayedColor'] = 'rgba(255, 18, 34, 1)'
-}
 
 export default defaultSetting

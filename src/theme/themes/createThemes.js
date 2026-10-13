@@ -297,7 +297,8 @@ const defaultThemes = [
   },
 ]
 
-const themes = defaultThemes.map(({ config: { primary, font, ...extInfo }, ...themeInfo }) => {
+// 只保留默认主题（green）和跟随系统深色模式时使用的 black
+const themes = defaultThemes.filter(t => ['green', 'black'].includes(t.id)).map(({ config: { primary, font, ...extInfo }, ...themeInfo }) => {
   return {
     ...themeInfo,
     isCustom: false,
