@@ -224,21 +224,23 @@ export default {
   getList(bangid, page, retryNum = 0) {
     if (++retryNum > 3) return Promise.reject(new Error('try max num'))
     bangid = parseInt(bangid)
-    let info = this.periods[bangid]
-    let p = info ? Promise.resolve(info.period) : this.getPeriods(bangid)
-    return p.then(period => {
-      return this.listDetailRequest(bangid, period, this.limit).then(resp => {
-        if (resp.body.code !== 0) return this.getList(bangid, page, retryNum)
-        return {
-          total: resp.body.toplist.data.songInfoList.length,
-          list: this.filterData(resp.body.toplist.data.songInfoList),
-          limit: this.limit,
-          page: 1,
-          source: 'tx',
-        }
-      })
+    // 期号留空时接口直接返回最新一期，不再先去抓 QQ 音乐网页取期号（网页请求慢且时常失败，导致榜单时好时坏）
+    return this.listDetailRequest(bangid, '', this.limit).then(resp => {
+      if (resp.body.code !== 0) return this.getList(bangid, page, retryNum)
+      return {
+        total: resp.body.toplist.data.songInfoList.length,
+        list: this.filterData(resp.body.toplist.data.songInfoList),
+        limit: this.limit,
+        page: 1,
+        source: 'tx',
+      }
+    }).catch(err => {
+      // 网络抖动时也重试，而不是直接报错
+      if (retryNum >= 3) throw err
+      return this.getList(bangid, page, retryNum)
     })
   },
+
 
   getDetailPageUrl(id) {
     if (typeof id == 'string') id = id.replace('tx__', '')
