@@ -5,7 +5,6 @@ import DorpDownMenu, { type DorpDownMenuProps as _DorpDownMenuProps } from '@/co
 import Text from '@/components/common/Text'
 import { useI18n } from '@/lang'
 
-import { useSettingValue } from '@/store/setting/hook'
 import { createStyle } from '@/utils/tools'
 
 type Sources = Readonly<Array<LX.OnlineSource | 'all'>>
@@ -21,16 +20,15 @@ export interface SourceSelectorType<S extends Sources> {
 }
 
 export const useSourceListI18n = (list: Sources) => {
-  const sourceNameType = useSettingValue('common.sourceNameType')
   const t = useI18n()
+  // 只显示平台原名
   return useMemo(() => {
-    return list.map(s => ({ label: t(`source_${sourceNameType}_${s}`), action: s }))
+    return list.map(s => ({ label: t(`source_real_${s}`), action: s }))
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [list, sourceNameType, t])
+  }, [list, t])
 }
 
 const Component = <S extends Sources>({ fontSize = 15, center, onSourceChange }: SourceSelectorProps<S>, ref: Ref<SourceSelectorType<S>>) => {
-  const sourceNameType = useSettingValue('common.sourceNameType')
   const [list, setList] = useState([] as unknown as S)
   const [source, setSource] = useState<S[number]>('kw')
   const t = useI18n()
@@ -60,7 +58,7 @@ const Component = <S extends Sources>({ fontSize = 15, center, onSourceChange }:
       activeId={source}
     >
       <View style={styles.sourceMenu}>
-        <Text style={{ textAlign: center ? 'center' : 'left' }} numberOfLines={1} size={fontSize}>{t(`source_${sourceNameType}_${source}`)}</Text>
+        <Text style={{ textAlign: center ? 'center' : 'left' }} numberOfLines={1} size={fontSize}>{t(`source_real_${source}`)}</Text>
       </View>
     </DorpDownMenu>
   )
