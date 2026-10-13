@@ -1,3 +1,4 @@
+import { downloadMusics } from '@/core/music/downloadMusic'
 import { LIST_IDS } from '@/config/constant'
 import { addListMusics } from '@/core/list'
 import { playList, playNext } from '@/core/player/player'
@@ -63,3 +64,7 @@ export const handleDislikeMusic = async(musicInfo: LX.Music.MusicInfoOnline) => 
   }
 }
 
+
+export const handleDownload = (musicInfo: LX.Music.MusicInfo, selectedList: LX.Music.MusicInfo[]) => {
+  void downloadMusics(selectedList.length ? selectedList : [musicInfo])
+}

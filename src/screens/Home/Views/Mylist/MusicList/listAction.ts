@@ -1,3 +1,4 @@
+import { downloadMusics } from '@/core/music/downloadMusic'
 import { addListMusics, removeListMusics, updateListMusicPosition, updateListMusics } from '@/core/list'
 import { playList, playListById, playNext } from '@/core/player/player'
 import { addTempPlayList } from '@/core/player/tempPlayList'
@@ -172,4 +173,8 @@ export const handleToggleSource = async(listId: string, musicInfo: LX.Music.Musi
     }
   })
   return true
+}
+
+export const handleDownload = (musicInfo: LX.Music.MusicInfo, selectedList: LX.Music.MusicInfo[]) => {
+  void downloadMusics(selectedList.length ? selectedList : [musicInfo])
 }
