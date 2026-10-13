@@ -14,6 +14,7 @@ import {
   handleGetOnlinePicUrl,
   getCachedLyricInfo,
 } from './utils'
+import { getDownloadedFilePath } from './downloadPath'
 
 /* export const setMusicUrl = ({ musicInfo, type, url }: {
   musicInfo: LX.Music.MusicInfo
@@ -52,6 +53,10 @@ export const getMusicUrl = async({ musicInfo, quality, isRefresh, allowToggleSou
 
   //   // return Promise.reject(new Error('该歌曲没有可播放的音频'))
   // }
+  if (!isRefresh) {
+    const downloadedPath = await getDownloadedFilePath(musicInfo)
+    if (downloadedPath) return downloadedPath
+  }
   const targetQuality = quality ?? getPlayQuality(settingState.setting['player.playQuality'], musicInfo)
   const cachedUrl = await getStoreMusicUrl(musicInfo, targetQuality)
   if (cachedUrl && !isRefresh) return cachedUrl

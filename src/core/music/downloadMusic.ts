@@ -1,13 +1,10 @@
-import { downloadFile, existsFile, externalStorageDirectoryPath, mkdir, moveFile, scanFile, temporaryDirectoryPath, unlink } from '@/utils/fs'
-import { filterFileName } from '@/utils/common'
-import { formatMusicName, requestStoragePermission, toast } from '@/utils/tools'
+import { downloadFile, existsFile, mkdir, moveFile, scanFile, temporaryDirectoryPath, unlink } from '@/utils/fs'
+import { requestStoragePermission, toast } from '@/utils/tools'
 import { writeLyric, writeMetadata, writePic } from '@/utils/localMediaMetadata'
-import settingState from '@/store/setting/state'
 import { log } from '@/utils/log'
 import { getPicUrl, getLyricInfo } from './online'
 import { handleGetOnlineMusicUrl } from './utils'
-
-export const DOWNLOAD_DIR = `${externalStorageDirectoryPath}/Music/LxMusic`
+import { DOWNLOAD_DIR, getDownloadFileName } from './downloadPath'
 
 const getExt = (quality: LX.Quality): LX.Download.FileExt => {
   switch (quality) {
@@ -62,7 +59,7 @@ const downloadOne = async(musicInfo: LX.Music.MusicInfoOnline) => {
     allowToggleSource: true,
     onToggleSource: () => {},
   })
-  const name = filterFileName(formatMusicName(settingState.setting['download.fileName'], musicInfo.name, musicInfo.singer))
+  const name = getDownloadFileName(musicInfo)
   const ext = getExt(quality)
   const filePath = `${DOWNLOAD_DIR}/${name}.${ext}`
   if (await existsFile(filePath)) return 'exists'

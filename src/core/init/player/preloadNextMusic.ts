@@ -23,7 +23,8 @@ const preloadNextMusicUrl = async(curTime: number) => {
   if (info) {
     preloadMusicInfo.info = info
     const url = await getMusicUrl({ musicInfo: info.musicInfo }).catch(() => '')
-    if (url) {
+    // 本地文件（已下载的歌）不用检查链接
+    if (url && !url.startsWith('/')) {
       console.log('preload url', url)
       const [cached, available] = await Promise.all([isCached(url), checkUrl(url).then(() => true).catch(() => false)])
       if (!cached && !available) {

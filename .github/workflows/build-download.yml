@@ -29,13 +29,26 @@ jobs:
       - name: Build Packages
         shell: bash
         run: |
+          set -o pipefail
           cd android
+          exec > >(tee ../build.log) 2>&1
           if [ -n "${{ secrets.KEYSTORE_STORE_FILE_BASE64 }}" ]; then
             echo ${{ secrets.KEYSTORE_STORE_FILE_BASE64 }} | base64 --decode > app/${{ secrets.KEYSTORE_STORE_FILE }}
             ./gradlew assembleRelease -PMYAPP_UPLOAD_STORE_FILE='${{ secrets.KEYSTORE_STORE_FILE }}' -PMYAPP_UPLOAD_KEY_ALIAS='${{ secrets.KEYSTORE_KEY_ALIAS }}' -PMYAPP_UPLOAD_STORE_PASSWORD='${{ secrets.KEYSTORE_PASSWORD }}' -PMYAPP_UPLOAD_KEY_PASSWORD='${{ secrets.KEYSTORE_KEY_PASSWORD }}'
           else
             ./gradlew assembleRelease -PMYAPP_UPLOAD_STORE_FILE=debug.keystore -PMYAPP_UPLOAD_KEY_ALIAS=androiddebugkey -PMYAPP_UPLOAD_STORE_PASSWORD=android -PMYAPP_UPLOAD_KEY_PASSWORD=android
           fi
+
+      # 失败时把关键报错写成注释（annotation），不登录也能看到
+      - name: Report build errors
+        if: failure()
+        shell: bash
+        run: |
+          # 每个 step 最多显示 10 条注释，所以把多行合成一条（%0A 是换行）
+          msg=$(grep -i -E "error|failed|wrong|exception|unable to" build.log | grep -v -i "warning" | head -40 | cut -c1-300 | sed ':a;N;$!ba;s/%/%25/g;s/\n/%0A/g')
+          echo "::error title=build errors::${msg}"
+          msg=$(tail -60 build.log | cut -c1-300 | sed ':a;N;$!ba;s/%/%25/g;s/\n/%0A/g')
+          echo "::error title=build log tail::${msg}"
 
       - name: Get package version
         run: |
