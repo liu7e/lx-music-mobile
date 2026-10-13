@@ -50,6 +50,7 @@
   "download_failed": "\"{name}\" download failed: {msg}",
   "download_finish": "Download finished: {success} succeeded, {failed} failed",
   "download_local_tip": "Local songs don't need downloading",
+  "download_not_audio": "The downloaded file is not audio, the source may be broken",
   "download_permission_tip": "Storage permission denied, cannot download",
   "download_start": "Downloading {num} song(s) to Music/LzMusic",
   "download_success": "\"{name}\" downloaded",

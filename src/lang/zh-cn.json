@@ -50,6 +50,7 @@
   "download_failed": "《{name}》下载失败：{msg}",
   "download_finish": "下载结束：成功 {success} 首，失败 {failed} 首",
   "download_local_tip": "本地歌曲无需下载",
+  "download_not_audio": "下载到的不是音频文件，可能是源失效了",
   "download_permission_tip": "没有存储权限，无法下载",
   "download_start": "开始下载 {num} 首歌曲，保存到 Music/LzMusic",
   "download_success": "《{name}》下载完成",

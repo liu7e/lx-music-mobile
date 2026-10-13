@@ -1,4 +1,4 @@
-import { downloadFile, existsFile, mkdir, moveFile, scanFile, temporaryDirectoryPath, unlink } from '@/utils/fs'
+import { downloadFile, existsFile, mkdir, moveFile, readFileHead, scanFile, temporaryDirectoryPath, unlink } from '@/utils/fs'
 import { requestStoragePermission, toast } from '@/utils/tools'
 import { writeLyric, writeMetadata, writePic } from '@/utils/localMediaMetadata'
 import { log } from '@/utils/log'
@@ -15,6 +15,25 @@ const getExt = (quality: LX.Quality): LX.Download.FileExt => {
     default:
       return 'mp3'
   }
+}
+
+// 按文件头判断真实格式：自定义源可能悄悄降级音质（例如请求 flac 实际给 mp3），不能只看请求的音质
+const detectExt = async(path: string, fallback: LX.Download.FileExt): Promise<LX.Download.FileExt> => {
+  try {
+    const head = Buffer.from(await readFileHead(path, 12), 'base64')
+    const ascii = (start: number, end: number) => head.toString('ascii', start, end)
+    if (ascii(0, 4) == 'fLaC') return 'flac'
+    if (ascii(0, 3) == 'ID3' || (head[0] == 0xff && (head[1] & 0xe0) == 0xe0)) return 'mp3'
+    if (ascii(4, 8) == 'ftyp') return 'm4a'
+    if (ascii(0, 4) == 'OggS') return 'ogg'
+    if (ascii(0, 4) == 'RIFF') return 'wav'
+    // 服务器返回的是网页或报错信息而不是音频
+    if (/^\s*[<{]/.test(ascii(0, 12))) throw new Error('not audio')
+  } catch (err: any) {
+    if (err.message == 'not audio') throw new Error(global.i18n.t('download_not_audio'))
+    log.warn(`download: detect ext failed: ${err.message}`)
+  }
+  return fallback
 }
 
 const runDownload = async(url: string, path: string) => {
@@ -63,11 +82,9 @@ const downloadOne = async(musicInfo: LX.Music.MusicInfoOnline, isRetry = false):
     onToggleSource: () => {},
   })
   const name = getDownloadFileName(musicInfo)
-  const ext = getExt(quality)
-  const filePath = `${DOWNLOAD_DIR}/${name}.${ext}`
-  if (await existsFile(filePath)) return 'exists'
+  const guessExt = getExt(quality)
   // 先下到临时文件再改名，避免中断后留下不完整的文件（保留扩展名，写标签时要靠它识别格式）
-  const tempPath = `${DOWNLOAD_DIR}/.${name}.downloading.${ext}`
+  let tempPath = `${DOWNLOAD_DIR}/.${name}.downloading.${guessExt}`
   try {
     await runDownload(url, tempPath)
   } catch (err) {
@@ -75,6 +92,20 @@ const downloadOne = async(musicInfo: LX.Music.MusicInfoOnline, isRetry = false):
     if (isRetry) throw err
     // 网络抖动或链接过期时，重新获取链接再试一次
     return downloadOne(musicInfo, true)
+  }
+  const ext = await detectExt(tempPath, guessExt).catch(async(err: Error) => {
+    void unlink(tempPath)
+    throw err
+  })
+  if (ext != guessExt) {
+    const realTempPath = `${DOWNLOAD_DIR}/.${name}.downloading.${ext}`
+    await moveFile(tempPath, realTempPath)
+    tempPath = realTempPath
+  }
+  const filePath = `${DOWNLOAD_DIR}/${name}.${ext}`
+  if (await existsFile(filePath)) {
+    void unlink(tempPath)
+    return 'exists'
   }
   await writeTags(musicInfo, tempPath)
   await moveFile(tempPath, filePath)

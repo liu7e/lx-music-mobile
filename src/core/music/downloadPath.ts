@@ -17,7 +17,7 @@ export const getDownloadedFilePath = async(musicInfo: LX.Music.MusicInfoOnline) 
   const formats = [settingState.setting['download.fileName'], ...FILE_NAME_FORMATS.filter(f => f != settingState.setting['download.fileName'])]
   for (const format of formats) {
     const name = getDownloadFileName(musicInfo, format)
-    for (const ext of ['flac', 'mp3']) {
+    for (const ext of ['flac', 'mp3', 'm4a', 'ogg', 'wav']) {
       const path = `${DOWNLOAD_DIR}/${name}.${ext}`
       if (await existsFile(path).catch(() => false)) return path
     }

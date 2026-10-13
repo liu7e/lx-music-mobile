@@ -84,6 +84,9 @@ export const downloadFile = (url: string, path: string, options: Omit<RNFS.Downl
   })
 }
 
+// 读取文件开头若干字节（base64），用于判断真实格式
+export const readFileHead = async(path: string, length: number) => RNFS.read(path, length, 0, 'base64')
+
 // 通知系统媒体库收录新文件，让其他音乐 App 也能看到
 export const scanFile = async(path: string) => RNFS.scanFile(path)
 
