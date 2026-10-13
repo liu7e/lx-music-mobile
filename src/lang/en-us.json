@@ -138,6 +138,7 @@
   "lists_dislike_music_tip": "Do you really dislike \"{name}\"?",
   "load_failed": "Ah, the loading failed 😥",
   "loading": "Loading...",
+  "local_list_name": "Local Music",
   "location": "From {location}",
   "lyric__load_error": "Failed to get lyrics",
   "metadata_edit_modal_confirm": "Save",

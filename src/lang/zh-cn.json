@@ -138,6 +138,7 @@
   "lists_dislike_music_tip": "你真的不喜欢「{name}」吗？",
   "load_failed": "啊~加载失败了😥",
   "loading": "加载中...",
+  "local_list_name": "本地音乐",
   "location": "来自{location}",
   "lyric__load_error": "歌词获取失败",
   "metadata_edit_modal_confirm": "保存",

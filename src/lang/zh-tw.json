@@ -138,6 +138,7 @@
   "lists_dislike_music_tip": "你真的不喜歡「{name}」嗎？",
   "load_failed": "啊~載入失敗了😥",
   "loading": "載入中...",
+  "local_list_name": "本機音樂",
   "location": "來自{location}",
   "lyric__load_error": "歌詞獲取失敗",
   "metadata_edit_modal_confirm": "儲存",

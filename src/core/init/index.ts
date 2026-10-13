@@ -12,6 +12,7 @@ import { setApiSource } from '@/core/apiSource'
 import commonActions from '@/store/common/action'
 import settingState from '@/store/setting/state'
 import { bootLog } from '@/utils/bootLog'
+import { syncLocalList } from '@/core/localDownloadList'
 
 let isFirstPush = true
 // 不弹防骗提示、用户协议和自动检查更新（官方更新包签名不同，无法覆盖安装此版本）
@@ -20,6 +21,7 @@ const handlePushedHomeScreen = async() => {
   isFirstPush = false
   if (!settingState.setting['common.isAgreePact']) updateSetting({ 'common.isAgreePact': true })
   void initDeeplink()
+  void syncLocalList()
 }
 
 let isInited = false

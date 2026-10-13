@@ -5,6 +5,7 @@ import { log } from '@/utils/log'
 import { getPicUrl, getLyricInfo } from './online'
 import { handleGetOnlineMusicUrl } from './utils'
 import { DOWNLOAD_DIR, getDownloadFileName } from './downloadPath'
+import { syncLocalList } from '@/core/localDownloadList'
 
 const getExt = (quality: LX.Quality): LX.Download.FileExt => {
   switch (quality) {
@@ -108,6 +109,7 @@ export const downloadMusics = async(list: LX.Music.MusicInfo[]) => {
         toast(global.i18n.t('download_failed', { name: musicInfo.name, msg: err.message }), 'long')
       }
     }
+    void syncLocalList()
     if (musics.length > 1) toast(global.i18n.t('download_finish', { success, failed }), 'long')
   })
   return queue
