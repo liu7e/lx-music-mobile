@@ -70,3 +70,17 @@ jobs:
           name: v${{ env.PACKAGE_VERSION }} download edition (${{ github.run_number }})
           body: 在官方 v${{ env.PACKAGE_VERSION }} 基础上加入歌曲下载功能。一般手机下载 arm64-v8a 版即可，不确定就下 universal 版。
           files: android/app/build/outputs/apk/release/*.apk
+
+      # 只保留最新一个版本，删除之前所有的 Release 和对应标签
+      - name: Remove old releases
+        env:
+          GH_TOKEN: ${{ github.token }}
+        shell: bash
+        run: |
+          CURRENT="v${{ env.PACKAGE_VERSION }}-download.${{ github.run_number }}"
+          gh release list --repo "${{ github.repository }}" --limit 200 --json tagName --jq '.[].tagName' | while read -r tag; do
+            if [ "$tag" != "$CURRENT" ]; then
+              echo "delete $tag"
+              gh release delete "$tag" --repo "${{ github.repository }}" --cleanup-tag --yes
+            fi
+          done
