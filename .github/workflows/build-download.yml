@@ -12,7 +12,8 @@ permissions:
 jobs:
   Android:
     name: Android
-    runs-on: ubuntu-latest
+    # 固定系统版本：ubuntu-latest 将于 2026-10-19 切到 Ubuntu 26，可能导致构建环境突变
+    runs-on: ubuntu-24.04
     steps:
       - name: Check out git repository
         uses: actions/checkout@v4
@@ -32,11 +33,13 @@ jobs:
           set -o pipefail
           cd android
           exec > >(tee ../build.log) 2>&1
+          # 只编手机用的 ARM 架构，x86 是模拟器/少数平板用的，省下约一半编译时间
+          ABI_ARGS='-PreactNativeArchitectures=armeabi-v7a,arm64-v8a'
           if [ -n "${{ secrets.KEYSTORE_STORE_FILE_BASE64 }}" ]; then
             echo ${{ secrets.KEYSTORE_STORE_FILE_BASE64 }} | base64 --decode > app/${{ secrets.KEYSTORE_STORE_FILE }}
-            ./gradlew assembleRelease -PMYAPP_UPLOAD_STORE_FILE='${{ secrets.KEYSTORE_STORE_FILE }}' -PMYAPP_UPLOAD_KEY_ALIAS='${{ secrets.KEYSTORE_KEY_ALIAS }}' -PMYAPP_UPLOAD_STORE_PASSWORD='${{ secrets.KEYSTORE_PASSWORD }}' -PMYAPP_UPLOAD_KEY_PASSWORD='${{ secrets.KEYSTORE_KEY_PASSWORD }}'
+            ./gradlew assembleRelease $ABI_ARGS -PMYAPP_UPLOAD_STORE_FILE='${{ secrets.KEYSTORE_STORE_FILE }}' -PMYAPP_UPLOAD_KEY_ALIAS='${{ secrets.KEYSTORE_KEY_ALIAS }}' -PMYAPP_UPLOAD_STORE_PASSWORD='${{ secrets.KEYSTORE_PASSWORD }}' -PMYAPP_UPLOAD_KEY_PASSWORD='${{ secrets.KEYSTORE_KEY_PASSWORD }}'
           else
-            ./gradlew assembleRelease -PMYAPP_UPLOAD_STORE_FILE=debug.keystore -PMYAPP_UPLOAD_KEY_ALIAS=androiddebugkey -PMYAPP_UPLOAD_STORE_PASSWORD=android -PMYAPP_UPLOAD_KEY_PASSWORD=android
+            ./gradlew assembleRelease $ABI_ARGS -PMYAPP_UPLOAD_STORE_FILE=debug.keystore -PMYAPP_UPLOAD_KEY_ALIAS=androiddebugkey -PMYAPP_UPLOAD_STORE_PASSWORD=android -PMYAPP_UPLOAD_KEY_PASSWORD=android
           fi
 
       # 失败时把关键报错写成注释（annotation），不登录也能看到
@@ -59,11 +62,6 @@ jobs:
         run: |
           cd android/app/build/outputs/apk/release
           md5sum *.apk
-
-      - name: Upload Artifact
-        uses: ./.github/actions/upload-artifact
-        env:
-          PACKAGE_VERSION: ${{ env.PACKAGE_VERSION }}
 
       - name: Publish Release
         uses: softprops/action-gh-release@v2

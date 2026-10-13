@@ -4,7 +4,7 @@ import { writeLyric, writeMetadata, writePic } from '@/utils/localMediaMetadata'
 import { log } from '@/utils/log'
 import { getPicUrl, getLyricInfo } from './online'
 import { handleGetOnlineMusicUrl } from './utils'
-import { DOWNLOAD_DIR, getDownloadFileName } from './downloadPath'
+import { DOWNLOAD_DIR, getDownloadFileName, getDownloadedFilePath } from './downloadPath'
 import { syncLocalList } from '@/core/localDownloadList'
 
 const getExt = (quality: LX.Quality): LX.Download.FileExt => {
@@ -53,7 +53,9 @@ const writeTags = async(musicInfo: LX.Music.MusicInfoOnline, filePath: string) =
   }
 }
 
-const downloadOne = async(musicInfo: LX.Music.MusicInfoOnline) => {
+const downloadOne = async(musicInfo: LX.Music.MusicInfoOnline, isRetry = false): Promise<'done' | 'exists'> => {
+  // 已下载过就不再去取链接，省一次请求
+  if (await getDownloadedFilePath(musicInfo)) return 'exists'
   const { url, quality } = await handleGetOnlineMusicUrl({
     musicInfo,
     isRefresh: true,
@@ -70,7 +72,9 @@ const downloadOne = async(musicInfo: LX.Music.MusicInfoOnline) => {
     await runDownload(url, tempPath)
   } catch (err) {
     void unlink(tempPath)
-    throw err
+    if (isRetry) throw err
+    // 网络抖动或链接过期时，重新获取链接再试一次
+    return downloadOne(musicInfo, true)
   }
   await writeTags(musicInfo, tempPath)
   await moveFile(tempPath, filePath)
