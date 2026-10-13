@@ -95,18 +95,14 @@ export const downloadMusics = async(list: LX.Music.MusicInfo[]) => {
     toast(global.i18n.t('download_permission_tip'), 'long')
     return
   }
-  toast(global.i18n.t('download_start', { num: musics.length }))
   queue = queue.then(async() => {
     await mkdir(DOWNLOAD_DIR).catch(() => {})
     let success = 0
     let failed = 0
     for (const musicInfo of musics) {
       try {
-        const result = await downloadOne(musicInfo)
+        await downloadOne(musicInfo)
         success++
-        if (musics.length == 1) {
-          toast(global.i18n.t(result == 'exists' ? 'download_exists' : 'download_success', { name: musicInfo.name }), 'long')
-        }
       } catch (err: any) {
         failed++
         log.error(`download ${musicInfo.name} failed: ${err.message}`)
@@ -114,7 +110,8 @@ export const downloadMusics = async(list: LX.Music.MusicInfo[]) => {
       }
     }
     void syncLocalList()
-    if (musics.length > 1) toast(global.i18n.t('download_finish', { success, failed }), 'long')
+    // 只在有失败时提示，成功的歌会自动出现在「本地音乐」列表里
+    if (musics.length > 1 && failed) toast(global.i18n.t('download_finish', { success, failed }), 'long')
   })
   return queue
 }
